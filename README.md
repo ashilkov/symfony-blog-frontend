@@ -1,5 +1,7 @@
 # Symfony Blog Frontend (React + Vite + TypeScript)
 
+<b>Currently in development.</b>
+
 A demo frontend for a Symfony-based blog API. This project is intended for a GitHub portfolio and showcases modern React patterns, routing, forms, rich text editing, and a Material UI-based design system.
 ## Backend API
 
