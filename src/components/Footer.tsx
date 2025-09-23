@@ -8,7 +8,6 @@ import {
   Stack,
 } from "@mui/material";
 import { GitHub, Twitter, LinkedIn } from "@mui/icons-material";
-import { Link } from "react-router";
 
 const Footer = () => {
   return (
