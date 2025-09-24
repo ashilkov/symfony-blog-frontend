@@ -7,7 +7,7 @@ import {
 
 const API_BASE_URL = import.meta.env.VITE_API_ENDPOINT;
 
-function getBaseUrl(): string {
+export function getBaseUrl(): string {
   const base = API_BASE_URL ?? "";
   if (!base) {
     // Default to same-origin; adjust as needed

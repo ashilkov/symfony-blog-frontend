@@ -1,72 +1,93 @@
-import type { Post, PostExtended } from './types';
-import { graphql } from './http';
-import { getIdFromIri } from './api_helper';
+import type { Post, PostExtended } from "./types";
+import { graphql } from "./http";
+import { getIdFromIri } from "./api_helper";
 
-export async function createPost(input: { title: string; content: string; blog: string }): Promise<Post> {
-    const MUTATION = `mutation CreatePost($input: createPostInput!) {
+export async function createPost(input: {
+  title: string;
+  content: string;
+  blog: string;
+}): Promise<Post> {
+  const MUTATION = `mutation CreatePost($input: createPostInput!) {
         createPost(input: $input) {
             post { id title content }
         }
     }`;
-    // Backend expects relation field as blog (IRI or ID as per schema)
-    const variables = { input: { title: input.title, content: input.content, blog: input.blog } } as const;
-    const result = await graphql<{ createPost: { post: Post } }>(MUTATION, variables);
-    return result.createPost.post;
+  // Backend expects relation field as blog (IRI or ID as per schema)
+  input.blog = '/api/blogs/' + input.blog;
+  const variables = {
+    input: { title: input.title, content: input.content, blog: input.blog },
+  } as const;
+  const result = await graphql<{ createPost: { post: Post } }>(
+    MUTATION,
+    variables
+  );
+  return result.createPost.post;
 }
 
 export async function fetchPosts(): Promise<PostExtended[]> {
-    const QUERY = `query Posts {
+  const QUERY = `query Posts {
         posts {
             edges { node { id title content blog { id name } } }
         }
     }`;
-    const result = await graphql<{ posts: { edges: { node: PostExtended }[] } }>(QUERY);
+  const result = await graphql<{ posts: { edges: { node: PostExtended }[] } }>(
+    QUERY
+  );
 
-    return (result.posts?.edges ?? []).map(e => {
-        const node = e.node;
-        return {
-            ...node,
-            id: getIdFromIri(node.id),
-            blog: node.blog ? {...node.blog, id: getIdFromIri(node.blog?.id)} : node.blog,
-        };
-    });
+  return (result.posts?.edges ?? []).map((e) => {
+    const node = e.node;
+    return {
+      ...node,
+      id: getIdFromIri(node.id),
+      blog: node.blog
+        ? { ...node.blog, id: getIdFromIri(node.blog?.id) }
+        : node.blog,
+    };
+  });
 }
 
 // fetch posts related to blog
 export async function fetchBlogPosts(blogId: string): Promise<PostExtended[]> {
-    const QUERY = `query Posts($blogId: ID!) {
+  const QUERY = `query Posts($blogId: ID!) {
         posts (blog_id: $blogId) {
             edges { node { id title content blog { id name } } }
         }
     }`;
-    const variables = {blogId: blogId};
-    const result = await graphql<{ posts: { edges: { node: PostExtended }[] } }>(QUERY, variables);
+  const variables = { blogId: blogId };
+  const result = await graphql<{ posts: { edges: { node: PostExtended }[] } }>(
+    QUERY,
+    variables
+  );
 
-    return (result.posts?.edges ?? []).map(e => {
-        const node = e.node;
-        return {
-            ...node,
-            id: getIdFromIri(node.id),
-            blog: node.blog ? {...node.blog, id: getIdFromIri(node.blog?.id)} : node.blog,
-        };
-    });
+  return (result.posts?.edges ?? []).map((e) => {
+    const node = e.node;
+    return {
+      ...node,
+      id: getIdFromIri(node.id),
+      blog: node.blog
+        ? { ...node.blog, id: getIdFromIri(node.blog?.id) }
+        : node.blog,
+    };
+  });
 }
 
 export async function fetchPost(id: string): Promise<PostExtended> {
-    const QUERY = `query Post ($id: ID!) {
+  const QUERY = `query Post ($id: ID!) {
         post (id: $id) {
             id title content blog { id name } user {username}
         }
     }`;
-    const variables = { id: "api/posts/" + id };
-    const result = await graphql<{ post: PostExtended }>(QUERY, variables);
-    
-    const post = result.post;
-    if (!post) throw new Error('Post not found');
+  const variables = { id: "api/posts/" + id };
+  const result = await graphql<{ post: PostExtended }>(QUERY, variables);
 
-    return {
-        ...post,
-        id: getIdFromIri(post.id),
-        blog: post.blog ? { ...post.blog, id: getIdFromIri(post.blog.id) } : post.blog,
-    };
+  const post = result.post;
+  if (!post) throw new Error("Post not found");
+
+  return {
+    ...post,
+    id: getIdFromIri(post.id),
+    blog: post.blog
+      ? { ...post.blog, id: getIdFromIri(post.blog.id) }
+      : post.blog,
+  };
 }
