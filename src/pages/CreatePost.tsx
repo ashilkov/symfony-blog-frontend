@@ -16,7 +16,7 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { createPost, fetchBlogs, type Blog } from "../lib/api";
+import { createPost, fetchBlogs, generatePost, type Blog } from "../lib/api";
 
 import { TiptapEditor } from "../components/TiptapEditor";
 
@@ -40,10 +40,10 @@ const schema = yup.object({
 
 const CreatePost = () => {
   const {
-    register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    getValues,
     setValue,
     control,
   } = useForm<FormValues>({
@@ -54,6 +54,7 @@ const CreatePost = () => {
   const [error, setError] = useState<string | null>(null);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loadingBlogs, setLoadingBlogs] = useState<boolean>(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -87,6 +88,22 @@ const CreatePost = () => {
       reset();
     } catch (e: any) {
       setError(e?.message || "Failed to create post");
+    }
+  };
+
+  const onGenerateClick = async () => {
+    setLoading(true);
+    // Get current form values if needed
+    const { title, content, blog } = getValues();
+    try {
+      const response = await generatePost(title, content, blog);
+      // Update the form fields with setValue
+      setValue("title", response.title);
+      setValue("content", response.content);
+      setLoading(false);
+    } catch (e: any) {
+      setError(e?.message);
+      setLoading(false);
     }
   };
 
@@ -139,12 +156,18 @@ const CreatePost = () => {
               />
             </FormControl>
 
-            <TextField
-              label="Title"
-              fullWidth
-              error={!!errors.title}
-              helperText={errors.title?.message}
-              {...register("title")}
+            <Controller
+              name="title"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Title"
+                  fullWidth
+                  error={!!errors.title}
+                  helperText={errors.title?.message}
+                />
+              )}
             />
 
             {/* Tiptap editor (with HTML source mode) wired to react-hook-form */}
@@ -168,6 +191,14 @@ const CreatePost = () => {
 
             <Button type="submit" variant="contained" disabled={isSubmitting}>
               {isSubmitting ? "Creating..." : "Create Post"}
+            </Button>
+            <Button
+              type="button"
+              variant="contained"
+              disabled={isSubmitting}
+              onClick={onGenerateClick}
+            >
+              {isSubmitting ? "Generating..." : "Generate content"}
             </Button>
           </Stack>
         </Box>

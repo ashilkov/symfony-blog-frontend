@@ -14,8 +14,14 @@ import { Placeholder } from "@tiptap/extensions";
 import { uploadImage } from "../lib/file";
 import { ResizableImage } from "tiptap-extension-resizable-image";
 import { Link, RichTextEditor } from "@mantine/tiptap";
+import { useEffect } from "react";
 
-export function TiptapEditor({ content = "", name = "", onChange }) {
+export function TiptapEditor({
+  content = "",
+  name = "",
+  onChange,
+  placeholder = "Write something ...",
+}) {
   const editor = useEditor({
     editable: true, // make it read-only
     content: content || "", // HTML string
@@ -25,19 +31,17 @@ export function TiptapEditor({ content = "", name = "", onChange }) {
       Link,
       Typography,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
-      Placeholder.configure({ placeholder: "Write something ..." }),
+      Placeholder.configure({ placeholder: placeholder }),
       ResizableImage.configure({
         defaultWidth: 200,
         defaultHeight: 200,
         async onUpload(file: File) {
           let src = URL.createObjectURL(file);
-          console.log(src);
           try {
             src = await uploadImage({ file: file });
           } catch (error) {
             console.error("Error uploading file:", error);
           }
-          console.log(src);
           return {
             src,
             "data-keep-ratio": true,
@@ -51,11 +55,17 @@ export function TiptapEditor({ content = "", name = "", onChange }) {
     editorProps: {
       attributes: {
         name: name,
-        // class: "tiptap-editor",
       },
     },
     immediatelyRender: false,
   });
+
+  // Update editor content when the value prop changes
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
   return (
     <RichTextEditor
@@ -104,7 +114,4 @@ export function TiptapEditor({ content = "", name = "", onChange }) {
       <RichTextEditor.Content />
     </RichTextEditor>
   );
-
-  // editor created/destroyed by useEditor automatically
-  return <EditorContent editor={editor} className="editor" />;
 }

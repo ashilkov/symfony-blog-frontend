@@ -3,10 +3,6 @@ import { fetchBlogs, type Blog } from "../lib/api";
 import {
   Box,
   Typography,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
   CircularProgress,
   Alert,
   Stack,
@@ -20,7 +16,6 @@ import {
 import { Add } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { TiptapViewer } from "../components/TiptapViewer";
 import DOMPurify from "dompurify";
 
 const truncate = (s: string, n = 200) =>

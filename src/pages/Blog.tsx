@@ -1,10 +1,21 @@
-import { Alert, Box, Button, Card, CardActionArea, CardContent, CircularProgress, Divider, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  CircularProgress,
+  Divider,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { fetchBlog } from "../lib/blog";
 import type { BlogExtended } from "../lib/types";
 import { TiptapViewer } from "../components/TiptapViewer";
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 const Blog = () => {
   const { blogId } = useParams<{ blogId?: string }>();
@@ -60,7 +71,7 @@ const Blog = () => {
 
         {!loading && !error && blog === null && blogId && (
           <Box sx={{ mt: 6 }}>
-            <Alert severity="info">Post not found.</Alert>
+            <Alert severity="info">Blog not found.</Alert>
           </Box>
         )}
 
@@ -73,7 +84,8 @@ const Blog = () => {
             </Box>
 
             <Divider sx={{ my: 2 }} />
-
+            <TiptapViewer content={blog.description} />
+            <Divider sx={{ my: 2 }} />
             <Box
               sx={{
                 display: "grid",
@@ -87,18 +99,32 @@ const Blog = () => {
               }}
             >
               {(blog.posts ?? []).map((post) => {
-                const safeHtml = DOMPurify.sanitize(post.content, { USE_PROFILES: { html: true } });
+                const safeHtml = DOMPurify.sanitize(post.content, {
+                  USE_PROFILES: { html: true },
+                });
 
                 return (
-                  <Card key={post.id} sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                  <Card
+                    key={post.id}
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
                     <CardActionArea
                       component={Link}
                       to={`/post/${post.id}`}
-                      sx={{ display: "flex", flexDirection: "column", alignItems: "stretch", flexGrow: 1, position: "relative" }}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "stretch",
+                        flexGrow: 1,
+                        position: "relative",
+                      }}
                     >
                       <CardContent
                         sx={{
-                          position: "absolute",
                           top: 8,
                           left: 8,
                           right: 8,
@@ -111,7 +137,10 @@ const Blog = () => {
                           zIndex: 2,
                         }}
                       >
-                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 700 }}
+                        >
                           {post.title}
                         </Typography>
                       </CardContent>
@@ -124,7 +153,6 @@ const Blog = () => {
                             WebkitBoxOrient: "vertical",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            marginTop: 2,
                             "& > *": {
                               margin: 0,
                             },
@@ -135,8 +163,21 @@ const Blog = () => {
                       </CardContent>
                     </CardActionArea>
 
-                    <Box sx={{ px: 2, py: 1, mt: "auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <Button size="small" component={Link} to={`/post/${post.id}`}>
+                    <Box
+                      sx={{
+                        px: 2,
+                        py: 1,
+                        mt: "auto",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Button
+                        size="small"
+                        component={Link}
+                        to={`/post/${post.id}`}
+                      >
                         Read
                       </Button>
                     </Box>

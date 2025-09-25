@@ -13,7 +13,7 @@ export async function createPost(input: {
         }
     }`;
   // Backend expects relation field as blog (IRI or ID as per schema)
-  input.blog = '/api/blogs/' + input.blog;
+  input.blog = "/api/blogs/" + input.blog;
   const variables = {
     input: { title: input.title, content: input.content, blog: input.blog },
   } as const;
@@ -74,7 +74,7 @@ export async function fetchBlogPosts(blogId: string): Promise<PostExtended[]> {
 export async function fetchPost(id: string): Promise<PostExtended> {
   const QUERY = `query Post ($id: ID!) {
         post (id: $id) {
-            id title content blog { id name } user {username}
+            id title content created_at blog { id name } user {username}
         }
     }`;
   const variables = { id: "api/posts/" + id };
@@ -90,4 +90,20 @@ export async function fetchPost(id: string): Promise<PostExtended> {
       ? { ...post.blog, id: getIdFromIri(post.blog.id) }
       : post.blog,
   };
+}
+
+export async function generatePost(
+  title?: string,
+  content?: string,
+  blogId?: string
+): Promise<Post> {
+  const QUERY = `query generatePost($title: String, $content: String, $blogId: String!) {
+      generatePost(title: $title, content: $content, blogId: $blogId) {
+          title content
+      }
+  }`;
+  const variables = { title: title, content: content, blogId: blogId };
+  const result = await graphql<{ generatePost: Post }>(QUERY, variables);
+
+  return result.generatePost;
 }

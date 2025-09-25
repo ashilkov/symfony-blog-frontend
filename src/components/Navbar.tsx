@@ -92,16 +92,16 @@ const Navbar = () => {
                   <MenuItem
                     onClick={closePlusMenu}
                     component={Link}
-                    to="/posts/new"
+                    to="/blogs/new"
                   >
-                    New Post
+                    New Blog
                   </MenuItem>
                   <MenuItem
                     onClick={closePlusMenu}
                     component={Link}
-                    to="/blogs/new"
+                    to="/posts/new"
                   >
-                    New Blog
+                    New Post
                   </MenuItem>
                 </Menu>
               </>
@@ -128,16 +128,16 @@ const Navbar = () => {
                   <MenuItem
                     onClick={closePlusMenu}
                     component={Link}
-                    to="/posts/new"
+                    to="/blogs/new"
                   >
-                    New Post
+                    New Blog
                   </MenuItem>
                   <MenuItem
                     onClick={closePlusMenu}
                     component={Link}
-                    to="/blogs/new"
+                    to="/posts/new"
                   >
-                    New Blog
+                    New Post
                   </MenuItem>
                 </Menu>
               </>

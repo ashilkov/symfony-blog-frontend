@@ -7,13 +7,13 @@ import {
   Button,
   Alert,
   FormControl,
-  InputLabel,
+  CircularProgress,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useState } from "react";
-import { createBlog } from "../lib/api";
+import { createBlog, generateBlog } from "../lib/api";
 import { TiptapEditor } from "../components/TiptapEditor";
 
 type FormValues = {
@@ -34,17 +34,19 @@ const schema = yup.object({
 
 const CreateBlog = () => {
   const {
-    register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
     control,
+    setValue,
+    getValues,
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
     defaultValues: { name: "", description: "" },
   });
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (values: FormValues) => {
     setSuccess(null);
@@ -55,6 +57,22 @@ const CreateBlog = () => {
       reset();
     } catch (e: any) {
       setError(e?.message || "Failed to create blog");
+    }
+  };
+
+  const onGenerateClick = async () => {
+    setLoading(true);
+    // Get current form values if needed
+    const { name, description } = getValues();
+    try {
+      const response = await generateBlog(name, description);
+      // Update the form fields with setValue
+      setValue("name", response.name);
+      setValue("description", response.description);
+      setLoading(false);
+    } catch (e: any) {
+      setError(e?.message);
+      setLoading(false);
     }
   };
 
@@ -73,26 +91,38 @@ const CreateBlog = () => {
           Create Blog
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+          {loading && (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+              <CircularProgress />
+            </Box>
+          )}
           <Stack spacing={2}>
             {error && <Alert severity="error">{error}</Alert>}
             {success && <Alert severity="success">{success}</Alert>}
             <FormControl fullWidth>
-              <TextField
-                label="Name"
-                fullWidth
-                error={!!errors.name}
-                helperText={errors.name?.message}
-                {...register("name")}
+              <Controller
+                name="name"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Name"
+                    fullWidth
+                    error={!!errors.name}
+                    helperText={errors.name?.message}
+                  />
+                )}
               />
-
               <Controller
                 name="description"
                 control={control}
-                render={({ field }) => (
+                render={({ field: { onChange, value } }) => (
                   <>
                     <TiptapEditor
                       name="description"
-                      onChange={field.onChange}
+                      content={value}
+                      onChange={onChange}
+                      placeholder="Descibe your blog"
                     />
                   </>
                 )}
@@ -100,6 +130,14 @@ const CreateBlog = () => {
             </FormControl>
             <Button type="submit" variant="contained" disabled={isSubmitting}>
               {isSubmitting ? "Creating..." : "Create Blog"}
+            </Button>
+            <Button
+              type="button"
+              variant="contained"
+              disabled={isSubmitting}
+              onClick={onGenerateClick}
+            >
+              {isSubmitting ? "Generating..." : "Generate content"}
             </Button>
           </Stack>
         </Box>
