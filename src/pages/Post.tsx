@@ -98,7 +98,7 @@ const Post = () => {
                     {post.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {post.user?.username ?? "Unknown author"} •{" "}
+                    {post.author ?? "Unknown author"} •{" "}
                     {post.created_at
                       ? new Date(post.created_at).toLocaleDateString()
                       : "—"}{" "}
