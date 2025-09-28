@@ -24,6 +24,27 @@ export async function createPost(input: {
   return result.createPost.post;
 }
 
+export async function editPost(input: {
+  id: string;
+  title: string;
+  content: string;
+}): Promise<Post> {
+  const MUTATION = `mutation editPost($input: editPostInput!) {
+      editPost(input: $input) {
+          post { id title content }
+      }
+  }`;
+  input.id = "/api/posts/" + input.id;
+  const variables = {
+    input: { title: input.title, content: input.content, id: input.id },
+  } as const;
+  const result = await graphql<{ editPost: { post: Post } }>(
+    MUTATION,
+    variables
+  );
+  return result.editPost.post;
+}
+
 export async function fetchPosts(): Promise<PostExtended[]> {
   const QUERY = `query Posts {
         posts {
@@ -74,7 +95,7 @@ export async function fetchBlogPosts(blogId: string): Promise<PostExtended[]> {
 export async function fetchPost(id: string): Promise<PostExtended> {
   const QUERY = `query Post ($id: ID!) {
         post (id: $id) {
-            id title content createdAt blog { id name } author
+            id title content createdAt blog { id name } author allowedActions
         }
     }`;
   const variables = { id: "api/posts/" + id };

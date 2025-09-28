@@ -6,14 +6,16 @@ import {
   Alert,
   Box,
   CircularProgress,
-  Container,
   Divider,
   Paper,
   Stack,
   Typography,
 } from "@mui/material";
 import { TiptapViewer } from "../components/TiptapViewer";
-
+import EditIcon from "@mui/icons-material/Edit";
+import { Link as RouterLink } from "react-router-dom";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
 function calcReadTime(html: string) {
   // rough word count from textContent
   const text =
@@ -106,6 +108,20 @@ const Post = () => {
                   </Typography>
                 </Box>
               </Stack>
+              {post.allowedActions.includes("edit") && (
+                <Tooltip title="Edit post">
+                  <IconButton
+                    component={RouterLink}
+                    to={`/post/${postId}/edit`}
+                    color="primary"
+                    size="large"
+                    aria-label="Edit post"
+                    sx={{ ml: 1 }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
             </Stack>
             <Divider sx={{ my: 2 }} />
             <Paper

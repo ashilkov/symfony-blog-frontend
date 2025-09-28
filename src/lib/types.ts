@@ -32,6 +32,7 @@ export type Post = {
   title: string;
   content: string;
   author: string;
+  allowedActions: string[];
   created_at: string;
   updated_at: string;
 };

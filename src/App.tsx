@@ -11,6 +11,7 @@ import CreatePost from "./pages/CreatePost";
 import Post from "./pages/Post";
 import About from "./pages/About";
 import { MantineProvider } from "@mantine/core";
+import EditPost from "./pages/EditPost";
 
 // removed placeholder Posts component in favor of page
 const Contact = () => <div>Contact</div>;
@@ -23,6 +24,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Posts />} />
             <Route path="/post/:postId" element={<Post />} />
+            <Route path="/post/:postId/edit" element={<EditPost />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/blog/:blogId" element={<Blog />} />
             <Route path="/posts/new" element={<CreatePost />} />
