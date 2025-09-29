@@ -143,7 +143,7 @@ const Posts = () => {
 
           <Stack spacing={2}>
             {(posts ?? []).map((p) => {
-              const id = p.id;
+              const id = p._id;
               const createdAt =
                 (p as any).createdAt ?? (p as any).created_at ?? null;
               const authorName =

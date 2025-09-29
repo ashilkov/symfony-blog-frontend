@@ -1,6 +1,5 @@
 import type { Post, PostExtended } from "./types";
 import { graphql } from "./http";
-import { getIdFromIri } from "./api_helper";
 
 export async function createPost(input: {
   title: string;
@@ -9,7 +8,7 @@ export async function createPost(input: {
 }): Promise<Post> {
   const MUTATION = `mutation CreatePost($input: createPostInput!) {
         createPost(input: $input) {
-            post { id title content }
+            post { _id id title content }
         }
     }`;
   // Backend expects relation field as blog (IRI or ID as per schema)
@@ -31,7 +30,7 @@ export async function editPost(input: {
 }): Promise<Post> {
   const MUTATION = `mutation editPost($input: editPostInput!) {
       editPost(input: $input) {
-          post { id title content }
+          post { _id id title content }
       }
   }`;
   input.id = "/api/posts/" + input.id;
@@ -48,7 +47,7 @@ export async function editPost(input: {
 export async function fetchPosts(): Promise<PostExtended[]> {
   const QUERY = `query Posts {
         posts {
-            edges { node { id title content blog { id name } } }
+            edges { node { _id id title content blog { _id id name } } }
         }
     }`;
   const result = await graphql<{ posts: { edges: { node: PostExtended }[] } }>(
@@ -56,14 +55,7 @@ export async function fetchPosts(): Promise<PostExtended[]> {
   );
 
   return (result.posts?.edges ?? []).map((e) => {
-    const node = e.node;
-    return {
-      ...node,
-      id: getIdFromIri(node.id),
-      blog: node.blog
-        ? { ...node.blog, id: getIdFromIri(node.blog?.id) }
-        : node.blog,
-    };
+    return e.node;
   });
 }
 
@@ -71,7 +63,7 @@ export async function fetchPosts(): Promise<PostExtended[]> {
 export async function fetchBlogPosts(blogId: string): Promise<PostExtended[]> {
   const QUERY = `query Posts($blogId: ID!) {
         posts (blog_id: $blogId) {
-            edges { node { id title content blog { id name } } }
+            edges { node { _id id title content blog { _id id name } } }
         }
     }`;
   const variables = { blogId: blogId };
@@ -81,21 +73,14 @@ export async function fetchBlogPosts(blogId: string): Promise<PostExtended[]> {
   );
 
   return (result.posts?.edges ?? []).map((e) => {
-    const node = e.node;
-    return {
-      ...node,
-      id: getIdFromIri(node.id),
-      blog: node.blog
-        ? { ...node.blog, id: getIdFromIri(node.blog?.id) }
-        : node.blog,
-    };
+    return e.node;
   });
 }
 
 export async function fetchPost(id: string): Promise<PostExtended> {
   const QUERY = `query Post ($id: ID!) {
         post (id: $id) {
-            id title content createdAt blog { id name } author allowedActions
+            _id id title content createdAt blog { id name } author allowedActions
         }
     }`;
   const variables = { id: "api/posts/" + id };
@@ -104,13 +89,7 @@ export async function fetchPost(id: string): Promise<PostExtended> {
   const post = result.post;
   if (!post) throw new Error("Post not found");
 
-  return {
-    ...post,
-    id: getIdFromIri(post.id),
-    blog: post.blog
-      ? { ...post.blog, id: getIdFromIri(post.blog.id) }
-      : post.blog,
-  };
+  return post;
 }
 
 export async function generatePost(

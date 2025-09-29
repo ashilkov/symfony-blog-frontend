@@ -11,6 +11,7 @@ export interface RegisterPayload {
 }
 
 export type User = {
+  _id: number;
   id: string | null;
   username: string;
   email: string;
@@ -18,9 +19,11 @@ export type User = {
 };
 
 export type Blog = {
+  _id: number;
   id: string;
   name: string;
   description: string;
+  subscribed: boolean;
 };
 
 export type BlogExtended = Blog & {
@@ -28,6 +31,7 @@ export type BlogExtended = Blog & {
 };
 
 export type Post = {
+  _id: number;
   id: string;
   title: string;
   content: string;
@@ -39,6 +43,13 @@ export type Post = {
 
 export type PostExtended = Post & {
   blog?: Blog;
+};
+
+export type Subscription = {
+  _id: number;
+  id: string;
+  userId: string;
+  blogId: string;
 };
 
 // responses

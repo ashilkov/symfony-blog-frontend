@@ -1,6 +1,5 @@
 import type { Blog, BlogExtended, BlogResponse } from "./types";
 import { graphql } from "./http";
-import { getIdFromIri } from "./api_helper";
 
 const api_path = "api/blogs/";
 
@@ -11,7 +10,7 @@ export async function createBlog(input: {
   // Note: schema expects lowercased createBlogInput
   const MUTATION = `mutation CreateBlog($input: createBlogInput!) {
         createBlog(input: $input) {
-            blog { id name description }
+            blog { _id id name description }
         }
     }`;
   const result = await graphql<{ createBlog: { blog: Blog } }>(MUTATION, {
@@ -24,23 +23,19 @@ export async function fetchBlogs(): Promise<Blog[]> {
   // Adjusted for cursor connection shape
   const QUERY = `query Blogs {
         blogs {
-            edges { node { id name description blogUsers {edges {node {role}}}}}
+            edges { node { _id id name description subscribed blogUsers {edges {node {role}}}}}
         }
     }`;
   const result = await graphql<{ blogs: { edges: { node: Blog }[] } }>(QUERY);
   return (result.blogs?.edges ?? []).map((e) => {
-    const node = e.node;
-    return {
-      ...node,
-      id: getIdFromIri(node.id),
-    };
+    return e.node;
   });
 }
 
 export async function fetchBlog(id: string): Promise<BlogExtended> {
   const QUERY = `query Blog ($id: ID!) {
         blog (id: $id) {
-            id name description posts {edges {node {id title content}}}
+            _id id name description posts {edges {node {_id id title content}}}
         }
     }`;
   const variables = { id: api_path + id };
@@ -50,16 +45,11 @@ export async function fetchBlog(id: string): Promise<BlogExtended> {
   if (!blog) throw new Error("Blog not found");
 
   const posts = (blog.posts?.edges ?? []).map((edge: { node: any }) => {
-    const node = edge.node;
-    return {
-      ...node,
-      id: getIdFromIri(node.id),
-    };
+    return edge.node;
   });
 
   return {
     ...blog,
-    id: getIdFromIri(blog.id),
     posts,
   };
 }

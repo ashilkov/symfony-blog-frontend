@@ -114,7 +114,7 @@ const Blog = () => {
                   >
                     <CardActionArea
                       component={Link}
-                      to={`/post/${post.id}`}
+                      to={`/post/${post._id}`}
                       sx={{
                         display: "flex",
                         flexDirection: "column",
@@ -176,7 +176,7 @@ const Blog = () => {
                       <Button
                         size="small"
                         component={Link}
-                        to={`/post/${post.id}`}
+                        to={`/post/${post._id}`}
                       >
                         Read
                       </Button>
