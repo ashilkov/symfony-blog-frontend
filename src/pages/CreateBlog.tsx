@@ -8,6 +8,7 @@ import {
   Alert,
   FormControl,
   CircularProgress,
+  Backdrop,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -62,6 +63,7 @@ const CreateBlog = () => {
 
   const onGenerateClick = async () => {
     setLoading(true);
+    setError(null);
     // Get current form values if needed
     const { name, description } = getValues();
     try {
@@ -69,9 +71,9 @@ const CreateBlog = () => {
       // Update the form fields with setValue
       setValue("name", response.name);
       setValue("description", response.description);
-      setLoading(false);
     } catch (e: any) {
-      setError(e?.message);
+      setError(e?.message || "Failed to generate blog");
+    } finally {
       setLoading(false);
     }
   };
@@ -86,16 +88,12 @@ const CreateBlog = () => {
           p: { xs: 2, sm: 3 },
           mt: { xs: 2, sm: 4 },
         }}
+        aria-busy={loading}
       >
         <Typography variant="h5" gutterBottom align="center">
           Create Blog
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-          {loading && (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-              <CircularProgress />
-            </Box>
-          )}
           <Stack spacing={2}>
             {error && <Alert severity="error">{error}</Alert>}
             {success && <Alert severity="success">{success}</Alert>}
@@ -110,6 +108,7 @@ const CreateBlog = () => {
                     fullWidth
                     error={!!errors.name}
                     helperText={errors.name?.message}
+                    disabled={loading}
                   />
                 )}
               />
@@ -123,25 +122,44 @@ const CreateBlog = () => {
                       content={value}
                       onChange={onChange}
                       placeholder="Descibe your blog"
+                      /* If TiptapEditor supports a disabled prop, pass:
+                         disabled={loading}
+                         Otherwise the Backdrop will cover it while generating.
+                      */
                     />
                   </>
                 )}
               />
             </FormControl>
-            <Button type="submit" variant="contained" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting || loading}
+            >
               {isSubmitting ? "Creating..." : "Create Blog"}
             </Button>
             <Button
               type="button"
               variant="contained"
-              disabled={isSubmitting}
+              disabled={isSubmitting || loading}
               onClick={onGenerateClick}
             >
-              {isSubmitting ? "Generating..." : "Generate content"}
+              {loading ? "Generating..." : "Generate content"}
             </Button>
           </Stack>
         </Box>
       </Paper>
+
+      {/* Full screen Backdrop shown while generating */}
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 1 }}
+        open={loading}
+      >
+        <Stack alignItems="center" spacing={2}>
+          <CircularProgress color="inherit" />
+          <Typography>Generating…</Typography>
+        </Stack>
+      </Backdrop>
     </Box>
   );
 };

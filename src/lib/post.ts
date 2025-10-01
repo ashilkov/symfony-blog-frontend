@@ -80,7 +80,7 @@ export async function fetchBlogPosts(blogId: string): Promise<PostExtended[]> {
 export async function fetchPost(id: string): Promise<PostExtended> {
   const QUERY = `query Post ($id: ID!) {
         post (id: $id) {
-            _id id title content createdAt blog { id name } author allowedActions
+            _id id title content createdAt blog { _id id name } author allowedActions
         }
     }`;
   const variables = { id: "api/posts/" + id };

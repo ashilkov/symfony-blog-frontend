@@ -12,6 +12,7 @@ import {
   Select,
   MenuItem,
   CircularProgress,
+  Backdrop,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -54,7 +55,7 @@ const CreatePost = () => {
   const [error, setError] = useState<string | null>(null);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loadingBlogs, setLoadingBlogs] = useState<boolean>(true);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // generating overlay
 
   useEffect(() => {
     let mounted = true;
@@ -93,16 +94,17 @@ const CreatePost = () => {
 
   const onGenerateClick = async () => {
     setLoading(true);
+    setError(null);
     // Get current form values if needed
     const { title, content, blog } = getValues();
     try {
-      const response = await generatePost(title, content, blog);
+      const response = await generatePost(title, content, blog.toString());
       // Update the form fields with setValue
       setValue("title", response.title);
       setValue("content", response.content);
-      setLoading(false);
     } catch (e: any) {
-      setError(e?.message);
+      setError(e?.message || "Failed to generate content");
+    } finally {
       setLoading(false);
     }
   };
@@ -117,6 +119,7 @@ const CreatePost = () => {
           p: { xs: 2, sm: 3 },
           mt: { xs: 2, sm: 4 },
         }}
+        aria-busy={loading}
       >
         <Typography variant="h5" gutterBottom align="center">
           Create Post
@@ -127,7 +130,7 @@ const CreatePost = () => {
             {success && <Alert severity="success">{success}</Alert>}
             <FormControl
               fullWidth
-              disabled={loadingBlogs}
+              disabled={loadingBlogs || loading}
               error={!!errors.blog}
             >
               <InputLabel id="blog-select-label">Blog</InputLabel>
@@ -147,7 +150,7 @@ const CreatePost = () => {
                       </MenuItem>
                     )}
                     {blogs.map((b) => (
-                      <MenuItem key={b.id} value={b.id}>
+                      <MenuItem key={b._id} value={b._id}>
                         {b.name}
                       </MenuItem>
                     ))}
@@ -166,6 +169,7 @@ const CreatePost = () => {
                   fullWidth
                   error={!!errors.title}
                   helperText={errors.title?.message}
+                  disabled={loading}
                 />
               )}
             />
@@ -179,6 +183,7 @@ const CreatePost = () => {
                   <TiptapEditor
                     content={field.value}
                     onChange={field.onChange}
+                    // if TiptapEditor supports a disabled prop, you could pass it here
                   />
                   {errors.content && (
                     <Typography variant="caption" color="error">
@@ -189,20 +194,35 @@ const CreatePost = () => {
               )}
             />
 
-            <Button type="submit" variant="contained" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting || loading}
+            >
               {isSubmitting ? "Creating..." : "Create Post"}
             </Button>
             <Button
               type="button"
               variant="contained"
-              disabled={isSubmitting}
+              disabled={isSubmitting || loading}
               onClick={onGenerateClick}
             >
-              {isSubmitting ? "Generating..." : "Generate content"}
+              {loading ? "Generating..." : "Generate content"}
             </Button>
           </Stack>
         </Box>
       </Paper>
+
+      {/* Full screen MUI Backdrop shown while generating */}
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 1 }}
+        open={loading}
+      >
+        <Stack alignItems="center" spacing={2}>
+          <CircularProgress color="inherit" />
+          <Typography>Generating…</Typography>
+        </Stack>
+      </Backdrop>
     </Box>
   );
 };

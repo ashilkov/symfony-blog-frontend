@@ -8,6 +8,8 @@ import {
   TextField,
   Button,
   Alert,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -69,7 +71,7 @@ const EditPost = () => {
         setValue("content", data.content ?? "");
         // try several common shapes for blog id
         const blogVal =
-          (data.blog_id ?? data.blog?.id ?? data.blog ?? "")?.toString?.() ??
+          (data.blog_id ?? data.blog?._id ?? data.blog ?? "")?.toString?.() ??
           "";
         setBlogId(blogVal || null);
         setError(null);
@@ -111,6 +113,7 @@ const EditPost = () => {
       return;
     }
     setLoadingGenerate(true);
+    setError(null);
     const { title, content } = getValues();
     try {
       // pass blogId even though blog isn't editable
@@ -142,6 +145,7 @@ const EditPost = () => {
           p: { xs: 2, sm: 3 },
           mt: { xs: 2, sm: 4 },
         }}
+        aria-busy={loadingGenerate}
       >
         <Typography variant="h5" gutterBottom align="center">
           Edit Post
@@ -162,6 +166,7 @@ const EditPost = () => {
                   fullWidth
                   error={!!errors.title}
                   helperText={errors.title?.message}
+                  disabled={loadingGenerate || loadingPost}
                 />
               )}
             />
@@ -174,6 +179,8 @@ const EditPost = () => {
                   <TiptapEditor
                     content={field.value}
                     onChange={field.onChange}
+                    // if TiptapEditor supports a disabled prop you can pass it:
+                    // disabled={loadingGenerate || loadingPost}
                   />
                   {errors.content && (
                     <Typography variant="caption" color="error">
@@ -188,14 +195,14 @@ const EditPost = () => {
               <Button
                 type="submit"
                 variant="contained"
-                disabled={isSubmitting || loadingPost}
+                disabled={isSubmitting || loadingPost || loadingGenerate}
               >
                 {isSubmitting ? "Saving..." : "Save changes"}
               </Button>
               <Button
                 type="button"
                 variant="outlined"
-                disabled={isSubmitting || loadingGenerate}
+                disabled={isSubmitting || loadingGenerate || loadingPost}
                 onClick={onGenerateClick}
               >
                 {loadingGenerate ? "Generating..." : "Generate content"}
@@ -204,6 +211,17 @@ const EditPost = () => {
           </Stack>
         </Box>
       </Paper>
+
+      {/* Full screen Backdrop shown while generating */}
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 1 }}
+        open={loadingGenerate}
+      >
+        <Stack alignItems="center" spacing={2}>
+          <CircularProgress color="inherit" />
+          <Typography>Generating…</Typography>
+        </Stack>
+      </Backdrop>
     </Box>
   );
 };

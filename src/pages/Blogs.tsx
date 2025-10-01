@@ -224,7 +224,7 @@ const Blogs = () => {
                       title={
                         <Typography
                           component={Link}
-                          to={`/blog/${b.id}`}
+                          to={`/blog/${b._id}`}
                           sx={{ textDecoration: "none", color: "inherit" }}
                           variant="h6"
                         >
