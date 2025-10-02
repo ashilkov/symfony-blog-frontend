@@ -1,4 +1,4 @@
-import type { Post, PostExtended } from "./types";
+import type { Post, PostExtended, PostResponse } from "./types";
 import { graphql } from "./http";
 
 export async function createPost(input: {
@@ -80,16 +80,23 @@ export async function fetchBlogPosts(blogId: string): Promise<PostExtended[]> {
 export async function fetchPost(id: string): Promise<PostExtended> {
   const QUERY = `query Post ($id: ID!) {
         post (id: $id) {
-            _id id title content createdAt blog { _id id name } author allowedActions
+            _id id title content createdAt author allowedActions blog { _id id name } comments {edges {node {_id id content author createdAt updatedAt}}}
         }
     }`;
   const variables = { id: "api/posts/" + id };
-  const result = await graphql<{ post: PostExtended }>(QUERY, variables);
+  const result = await graphql<{ post: PostResponse }>(QUERY, variables);
 
   const post = result.post;
   if (!post) throw new Error("Post not found");
 
-  return post;
+  const comments = (post.comments?.edges ?? []).map((edge: { node: any }) => {
+    return edge.node;
+  });
+
+  return {
+    ...post,
+    comments,
+  };
 }
 
 export async function generatePost(

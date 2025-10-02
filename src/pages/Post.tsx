@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { fetchPost, type PostExtended } from "../lib/api";
+import { fetchPost, type PostExtended, type Comment } from "../lib/api";
+import { createComment } from "../lib/comment";
 import { useParams } from "react-router";
 import DOMPurify from "dompurify";
 import {
@@ -10,12 +11,16 @@ import {
   Paper,
   Stack,
   Typography,
+  Button,
 } from "@mui/material";
 import { TiptapViewer } from "../components/TiptapViewer";
+import { TiptapEditor } from "../components/TiptapEditor";
 import EditIcon from "@mui/icons-material/Edit";
 import { Link as RouterLink } from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
+import { useAuth } from "../context/AuthContext";
+
 function calcReadTime(html: string) {
   // rough word count from textContent
   const text =
@@ -30,12 +35,16 @@ const Post = () => {
   const [post, setPost] = useState<PostExtended | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState<Comment[]>([]);
+
+  // For demo purposes: determine logged in state (adapt as needed)
+  const isLoggedIn = useAuth().isAuthenticated;
 
   if (!postId) {
     setError("No post id provided");
     setLoading(false);
-
-    return;
+    return null;
   }
 
   useEffect(() => {
@@ -44,7 +53,10 @@ const Post = () => {
     fetchPost(postId)
       .then((data) => {
         if (mounted) {
+          console.log(data);
           setPost(data);
+          // assume data.comments returns an array of comments; if not available, leave comments empty.
+          setComments(data.comments || []);
           setError(null);
         }
       })
@@ -61,12 +73,27 @@ const Post = () => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [postId]);
 
   const sanitized = useMemo(() => {
     if (!post?.content) return "";
     return DOMPurify.sanitize(post.content, { USE_PROFILES: { html: true } });
   }, [post?.content]);
+
+  const handleCommentSubmit = async () => {
+    if (!commentText.trim()) return;
+    try {
+      // createComment should accept postId and comment text; adjust parameters as needed.
+      const newComment = await createComment({
+        postId: parseInt(postId),
+        content: commentText,
+      });
+      setComments((prev) => [...prev, newComment]);
+      setCommentText("");
+    } catch (err: any) {
+      alert(err.message || "Failed to add comment");
+    }
+  };
 
   return (
     <Box sx={{ maxWidth: 1000, mx: "auto", px: 2, py: { xs: 2, md: 4 } }}>
@@ -101,8 +128,8 @@ const Post = () => {
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {post.author ?? "Unknown author"} •{" "}
-                    {post.created_at
-                      ? new Date(post.created_at).toLocaleDateString()
+                    {post.createdAt
+                      ? new Date(post.createdAt).toLocaleDateString()
                       : "—"}{" "}
                     • ~ {calcReadTime(post.content)} mins read
                   </Typography>
@@ -130,6 +157,53 @@ const Post = () => {
             >
               <TiptapViewer content={sanitized} />
             </Paper>
+
+            {/* Comment Section */}
+            <Divider sx={{ my: 4 }} />
+            <Box>
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                Comments
+              </Typography>
+              {comments.length === 0 ? (
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  No comments yet.
+                </Typography>
+              ) : (
+                comments.map((c) => (
+                  <Paper key={c.id} sx={{ p: 2, mb: 2 }}>
+                    <Typography variant="subtitle2">
+                      {c.author} •{" "}
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </Typography>
+                    <TiptapViewer
+                      content={DOMPurify.sanitize(c.content, {
+                        USE_PROFILES: { html: true },
+                      })}
+                    />
+                  </Paper>
+                ))
+              )}
+
+              {isLoggedIn ? (
+                <Box sx={{ mt: 2 }}>
+                  <TiptapEditor
+                    content={commentText}
+                    onChange={setCommentText}
+                  />
+                  <Button
+                    variant="contained"
+                    sx={{ mt: 1 }}
+                    onClick={handleCommentSubmit}
+                  >
+                    Post Comment
+                  </Button>
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  You must be logged in to post a comment.
+                </Typography>
+              )}
+            </Box>
           </>
         )}
       </Box>

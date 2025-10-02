@@ -37,12 +37,13 @@ export type Post = {
   content: string;
   author: string;
   allowedActions: string[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type PostExtended = Post & {
   blog?: Blog;
+  comments?: Comment[];
 };
 
 export type Subscription = {
@@ -52,10 +53,22 @@ export type Subscription = {
   blogId: string;
 };
 
+export type Comment = {
+  _id: number;
+  id: string;
+  content: string;
+  author: string;
+  createdAt: string;
+  updatedAt: string;
+};
 // responses
 
 export type BlogResponse = Blog & {
   posts: Collection;
+};
+
+export type PostResponse = Post & {
+  comments: Collection;
 };
 
 export type Collection = {
