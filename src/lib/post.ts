@@ -114,3 +114,21 @@ export async function generatePost(
 
   return result.generatePost;
 }
+
+export async function deletePost(input: { id: string }): Promise<boolean> {
+  const MUTATION = `mutation deletePost($input: deletePostInput!) {
+    deletePost(input: $input) {
+      post {
+        id
+      }
+    }
+  }`;
+  const variables = {
+    input: { id: "/api/posts/" + input.id },
+  } as const;
+  const result = await graphql<{ deletePost: { post: Post } }>(
+    MUTATION,
+    variables
+  );
+  return result.deletePost.post !== null;
+}

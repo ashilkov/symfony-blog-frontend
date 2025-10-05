@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
-import { fetchPost, type PostExtended, type Comment } from "../lib/api";
+import { fetchPost, type PostExtended, type Comment, deletePost } from "../lib/api";
 import { createComment } from "../lib/comment";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import DOMPurify from "dompurify";
 import {
   Alert,
@@ -12,10 +12,16 @@ import {
   Stack,
   Typography,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { TiptapViewer } from "../components/TiptapViewer";
 import { TiptapEditor } from "../components/TiptapEditor";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Link as RouterLink } from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
@@ -37,9 +43,22 @@ const Post = () => {
   const [error, setError] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Comment[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   // For demo purposes: determine logged in state (adapt as needed)
   const isLoggedIn = useAuth().isAuthenticated;
+
+  const handleDelete = async () => {
+    if (!postId) return;
+    try {
+      await deletePost({id: postId});
+      setDeleteDialogOpen(false);
+      navigate('/'); // Redirect to home after deletion
+    } catch (err: any) {
+      alert(err.message || "Failed to delete post");
+    }
+  };
 
   if (!postId) {
     setError("No post id provided");
@@ -135,20 +154,33 @@ const Post = () => {
                   </Typography>
                 </Box>
               </Stack>
-              {post.allowedActions.includes("edit") && (
-                <Tooltip title="Edit post">
-                  <IconButton
-                    component={RouterLink}
-                    to={`/post/${postId}/edit`}
-                    color="primary"
-                    size="large"
-                    aria-label="Edit post"
-                    sx={{ ml: 1 }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
+              <Stack direction="row" spacing={1}>
+                {post.allowedActions.includes("edit") && (
+                  <Tooltip title="Edit post">
+                    <IconButton
+                      component={RouterLink}
+                      to={`/post/${postId}/edit`}
+                      color="primary"
+                      size="large"
+                      aria-label="Edit post"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {post.allowedActions.includes("delete") && (
+                  <Tooltip title="Delete post">
+                    <IconButton
+                      color="error"
+                      size="large"
+                      aria-label="Delete post"
+                      onClick={() => setDeleteDialogOpen(true)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Stack>
             </Stack>
             <Divider sx={{ my: 2 }} />
             <Paper
@@ -204,6 +236,25 @@ const Post = () => {
                 </Typography>
               )}
             </Box>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+              open={deleteDialogOpen}
+              onClose={() => setDeleteDialogOpen(false)}
+            >
+              <DialogTitle>Delete Post</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  Are you sure you want to delete this post? This action cannot be undone.
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+                <Button onClick={handleDelete} color="error" autoFocus>
+                  Delete
+                </Button>
+              </DialogActions>
+            </Dialog>
           </>
         )}
       </Box>

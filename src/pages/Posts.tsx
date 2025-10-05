@@ -18,6 +18,7 @@ import {
   Skeleton,
   Divider,
   Link as MuiLink,
+  Container,
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { Link } from "react-router-dom";
@@ -81,20 +82,50 @@ const Posts = () => {
   }, []);
 
   return (
-    <Box>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Header Section */}
+      <Box textAlign="center" sx={{ mb: 6 }}>
+        <Typography 
+          variant="h2" 
+          component="h1" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 700,
+            background: 'linear-gradient(45deg, #1976d2 30%, #21CBF3 90%)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
+            mb: 2
+          }}
+        >
+          Latest Posts
+        </Typography>
+        <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
+          Discover the latest stories and insights from our community of writers.
+        </Typography>
+      </Box>
+
       <Stack
         direction="row"
-        justifyContent="space-between"
+        justifyContent="flex-end"
         alignItems="center"
-        sx={{ mb: 2 }}
+        sx={{ mb: 4 }}
       >
-        <Typography variant="h5">Posts</Typography>
         {isAuthenticated && (
           <>
             <IconButton
               color="primary"
               onClick={openMenu}
               aria-label="create new content"
+              size="large"
+              sx={{ 
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                  transform: 'scale(1.05)'
+                },
+                transition: 'transform 0.2s'
+              }}
             >
               <Add />
             </IconButton>
@@ -141,7 +172,13 @@ const Posts = () => {
             <Alert severity="info">No posts yet.</Alert>
           )}
 
-          <Stack spacing={2}>
+          <Box 
+            sx={{ 
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+              gap: 3
+            }}
+          >
             {(posts ?? []).map((p) => {
               const id = p._id;
               const createdAt =
@@ -153,13 +190,26 @@ const Posts = () => {
               const excerpt = truncate(plain, 220);
 
               return (
-                <Card key={id} variant="outlined">
+                <Card 
+                  key={id} 
+                  variant="outlined"
+                  sx={{ 
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: 4
+                    },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%'
+                  }}
+                >
                   <CardHeader
                     avatar={
                       avatarUrl ? (
                         <Avatar src={avatarUrl} />
                       ) : (
-                        <Avatar>
+                        <Avatar sx={{ bgcolor: 'primary.main' }}>
                           {(authorName || p.title || "P").charAt(0)}
                         </Avatar>
                       )
@@ -170,21 +220,28 @@ const Posts = () => {
                         to={`/post/${id}`}
                         underline="hover"
                         color="inherit"
-                        sx={{ fontWeight: 600 }}
+                        sx={{ fontWeight: 600, fontSize: '1.1rem' }}
                       >
                         {p.title}
                       </MuiLink>
                     }
                     subheader={
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        {p.blog && <Chip size="small" label={p.blog.name} />}
+                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                        {p.blog && (
+                          <Chip 
+                            size="small" 
+                            label={p.blog.name} 
+                            variant="outlined"
+                            color="primary"
+                          />
+                        )}
                         {authorName && (
-                          <Typography variant="caption">
+                          <Typography variant="caption" sx={{ fontWeight: 600 }}>
                             {authorName}
                           </Typography>
                         )}
                         {createdAt && (
-                          <Typography variant="caption">
+                          <Typography variant="caption" color="text.secondary">
                             • {relativeTime(createdAt)} ago
                           </Typography>
                         )}
@@ -193,7 +250,7 @@ const Posts = () => {
                     sx={{ pb: 0 }}
                   />
 
-                  <CardContent sx={{ pt: 1 }}>
+                  <CardContent sx={{ pt: 1, flexGrow: 1 }}>
                     <Typography variant="body2" color="text.secondary">
                       {excerpt || <i>No preview text available</i>}
                     </Typography>
@@ -201,20 +258,24 @@ const Posts = () => {
 
                   <Divider />
 
-                  <CardActions sx={{ justifyContent: "space-between", px: 2 }}>
-                    <Box>
-                      <Button size="small" component={Link} to={`/post/${id}`}>
-                        Read full
-                      </Button>
-                    </Box>
+                  <CardActions sx={{ justifyContent: "flex-end", px: 2, py: 1 }}>
+                    <Button 
+                      size="small" 
+                      component={Link} 
+                      to={`/post/${id}`}
+                      variant="outlined"
+                      color="primary"
+                    >
+                      Read full story
+                    </Button>
                   </CardActions>
                 </Card>
               );
             })}
-          </Stack>
+          </Box>
         </>
       )}
-    </Box>
+    </Container>
   );
 };
 

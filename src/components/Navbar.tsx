@@ -45,21 +45,34 @@ const Navbar = () => {
   ];
 
   return (
-    <AppBar position="static" color="primary">
+    <AppBar 
+      position="static" 
+      sx={{ 
+        background: 'linear-gradient(45deg, #1976d2 30%, #21CBF3 90%)',
+        boxShadow: 'none'
+      }}
+    >
       <Container maxWidth="lg">
         <Toolbar disableGutters>
           <Typography
-            variant="h6"
+            variant="h4"
             component={Link}
             to="/"
             color="inherit"
-            sx={{ textDecoration: "none", mr: 2 }}
+            sx={{ 
+              textDecoration: "none", 
+              mr: 2,
+              fontWeight: 700,
+              background: 'linear-gradient(45deg, #fff 30%, #e3f2fd 90%)',
+              backgroundClip: 'text',
+              textFillColor: 'transparent'
+            }}
           >
             PostHaven
           </Typography>
 
           <Box
-            sx={{ display: { xs: "none", sm: "flex" }, gap: 1, flexGrow: 1 }}
+            sx={{ display: { xs: "none", sm: "flex" }, gap: 1, flexGrow: 1, ml: 4 }}
           >
             {navItems.map((item) => (
               <Button
@@ -67,7 +80,14 @@ const Navbar = () => {
                 component={Link}
                 to={item.to}
                 color="inherit"
-                sx={{ textTransform: "none" }}
+                sx={{ 
+                  textTransform: "none",
+                  fontSize: '1.1rem',
+                  fontWeight: 500,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)'
+                  }
+                }}
               >
                 {item.label}
               </Button>
@@ -78,7 +98,15 @@ const Navbar = () => {
                   color="inherit"
                   onClick={openPlusMenu}
                   aria-label="create new content"
-                  sx={{ ml: 1 }}
+                  sx={{ 
+                    ml: 1,
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.3)',
+                      transform: 'scale(1.05)'
+                    },
+                    transition: 'transform 0.2s'
+                  }}
                 >
                   <Add />
                 </IconButton>
@@ -88,11 +116,18 @@ const Navbar = () => {
                   onClose={closePlusMenu}
                   anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                   transformOrigin={{ vertical: "top", horizontal: "right" }}
+                  PaperProps={{
+                    sx: {
+                      mt: 1.5,
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                    }
+                  }}
                 >
                   <MenuItem
                     onClick={closePlusMenu}
                     component={Link}
                     to="/blogs/new"
+                    sx={{ fontWeight: 500 }}
                   >
                     New Blog
                   </MenuItem>
@@ -100,6 +135,7 @@ const Navbar = () => {
                     onClick={closePlusMenu}
                     component={Link}
                     to="/posts/new"
+                    sx={{ fontWeight: 500 }}
                   >
                     New Post
                   </MenuItem>
@@ -115,6 +151,12 @@ const Navbar = () => {
                   color="inherit"
                   onClick={openPlusMenu}
                   aria-label="create new content"
+                  sx={{ 
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.3)'
+                    }
+                  }}
                 >
                   <Add />
                 </IconButton>
@@ -124,11 +166,18 @@ const Navbar = () => {
                   onClose={closePlusMenu}
                   anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                   transformOrigin={{ vertical: "top", horizontal: "right" }}
+                  PaperProps={{
+                    sx: {
+                      mt: 1.5,
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                    }
+                  }}
                 >
                   <MenuItem
                     onClick={closePlusMenu}
                     component={Link}
                     to="/blogs/new"
+                    sx={{ fontWeight: 500 }}
                   >
                     New Blog
                   </MenuItem>
@@ -136,6 +185,7 @@ const Navbar = () => {
                     onClick={closePlusMenu}
                     component={Link}
                     to="/posts/new"
+                    sx={{ fontWeight: 500 }}
                   >
                     New Post
                   </MenuItem>
@@ -146,6 +196,12 @@ const Navbar = () => {
               color="inherit"
               onClick={openMenu}
               aria-label="open navigation menu"
+              sx={{ 
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.3)'
+                }
+              }}
             >
               <MenuIcon />
             </IconButton>
@@ -155,6 +211,12 @@ const Navbar = () => {
               onClose={closeMenu}
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               transformOrigin={{ vertical: "top", horizontal: "right" }}
+              PaperProps={{
+                sx: {
+                  mt: 1.5,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                }
+              }}
             >
               {navItems.map((item) => (
                 <MenuItem
@@ -162,6 +224,7 @@ const Navbar = () => {
                   onClick={closeMenu}
                   component={Link}
                   to={item.to}
+                  sx={{ fontWeight: 500 }}
                 >
                   {item.label}
                 </MenuItem>
@@ -175,6 +238,14 @@ const Navbar = () => {
               component={Link}
               to={isAuthenticated ? "/account" : "/login"}
               aria-label={isAuthenticated ? "account" : "login"}
+              sx={{ 
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.3)',
+                  transform: 'scale(1.05)'
+                },
+                transition: 'transform 0.2s'
+              }}
             >
               <Person />
             </IconButton>

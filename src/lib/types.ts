@@ -26,8 +26,15 @@ export type Blog = {
   subscribed: boolean;
 };
 
+export type BlogUser = {
+  userId: string;
+  blogId: string;
+  role: string;
+};
+
 export type BlogExtended = Blog & {
   posts?: Post[];
+  blogUsers?: BlogUser[];
 };
 
 export type Post = {
@@ -65,6 +72,7 @@ export type Comment = {
 
 export type BlogResponse = Blog & {
   posts: Collection;
+  blogUsers: Collection;
 };
 
 export type PostResponse = Post & {

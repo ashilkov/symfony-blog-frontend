@@ -9,19 +9,31 @@ import {
   Divider,
   Stack,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
-import { fetchBlog } from "../lib/blog";
+import { Link, useParams, useNavigate } from "react-router";
+import { fetchBlog, deleteBlog } from "../lib/blog";
 import type { BlogExtended } from "../lib/types";
 import { TiptapViewer } from "../components/TiptapViewer";
 import DOMPurify from "dompurify";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useAuth } from "../context/AuthContext";
 
 const Blog = () => {
   const { blogId } = useParams<{ blogId?: string }>();
   const [blog, setBlog] = useState<BlogExtended | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!blogId) return;
@@ -52,12 +64,26 @@ const Blog = () => {
     };
   }, [blogId]);
 
+  const handleDelete = async () => {
+    if (!blogId) return;
+    try {
+      await deleteBlog({ id: blogId });
+      setDeleteDialogOpen(false);
+      navigate("/blogs");
+    } catch (err: any) {
+      setError(err?.message || "Failed to delete blog");
+    }
+  };
+
+  console.log(blog);
+  const isAdmin = blog?.blogUsers?.some((bu) => bu.role === "ROLE_ADMIN");
+
   return (
     <Box sx={{ maxWidth: 1000, mx: "auto", px: 2, py: { xs: 2, md: 4 } }}>
       <Box sx={{ p: { xs: 2, md: 4 } }}>
         {!blogId && (
           <Box sx={{ mt: 6 }}>
-            <Alert severity="info">No Post id provided.</Alert>
+            <Alert severity="info">No Blog id provided.</Alert>
           </Box>
         )}
 
@@ -77,10 +103,28 @@ const Blog = () => {
 
         {!loading && !error && blog && (
           <Stack>
-            <Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <Typography variant="h4" sx={{ fontWeight: 700 }}>
                 {blog.name}
               </Typography>
+              {isAdmin && (
+                <Tooltip title="Delete blog">
+                  <IconButton
+                    color="error"
+                    size="large"
+                    aria-label="Delete blog"
+                    onClick={() => setDeleteDialogOpen(true)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
             </Box>
 
             <Divider sx={{ my: 2 }} />
@@ -187,6 +231,26 @@ const Blog = () => {
             </Box>
           </Stack>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+        >
+          <DialogTitle>Delete Blog</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete this blog? This action cannot be
+              undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleDelete} color="error" autoFocus>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );

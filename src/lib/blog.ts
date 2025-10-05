@@ -35,7 +35,7 @@ export async function fetchBlogs(): Promise<Blog[]> {
 export async function fetchBlog(id: string): Promise<BlogExtended> {
   const QUERY = `query Blog ($id: ID!) {
         blog (id: $id) {
-            _id id name description posts {edges {node {_id id title content}}}
+            _id id name description posts {edges {node {_id id title content}}} blogUsers {edges {node {role}}}
         }
     }`;
   const variables = { id: api_path + id };
@@ -48,9 +48,14 @@ export async function fetchBlog(id: string): Promise<BlogExtended> {
     return edge.node;
   });
 
+  const blogUsers = (blog.blogUsers?.edges ?? []).map((edge: { node: any }) => {
+    return edge.node;
+  });
+
   return {
     ...blog,
     posts,
+    blogUsers,
   };
 }
 
@@ -68,3 +73,22 @@ export async function generateBlog(
 
   return result.generateBlog;
 }
+
+export async function deleteBlog(input: { id: string }): Promise<boolean> {
+  const MUTATION = `mutation deleteBlog($input: deleteBlogInput!) {
+    deleteBlog(input: $input) {
+      blog {
+        id
+      }
+    }
+  }`;
+  const variables = {
+    input: { id: "/api/blogs/" + input.id },
+  } as const;
+  const result = await graphql<{ deleteBlog: { blog: Blog } }>(
+    MUTATION,
+    variables
+  );
+  return result.deleteBlog.blog !== null;
+}
+

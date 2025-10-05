@@ -18,6 +18,8 @@ import {
   Avatar,
   Tooltip,
   Snackbar,
+  Container,
+  Chip,
 } from "@mui/material";
 import { Add, NotificationsNone, NotificationsOff } from "@mui/icons-material";
 import { Link } from "react-router-dom";
@@ -144,20 +146,50 @@ const Blogs = () => {
   };
 
   return (
-    <Box>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Header Section */}
+      <Box textAlign="center" sx={{ mb: 6 }}>
+        <Typography 
+          variant="h2" 
+          component="h1" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 700,
+            background: 'linear-gradient(45deg, #1976d2 30%, #21CBF3 90%)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
+            mb: 2
+          }}
+        >
+          Discover Blogs
+        </Typography>
+        <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
+          Explore diverse perspectives and find your next favorite blog from our growing community.
+        </Typography>
+      </Box>
+
       <Stack
         direction="row"
-        justifyContent="space-between"
+        justifyContent="flex-end"
         alignItems="center"
-        sx={{ mb: 3 }}
+        sx={{ mb: 4 }}
       >
-        <Typography variant="h5">Blogs</Typography>
         {isAuthenticated && (
           <>
             <IconButton
               color="primary"
               onClick={openMenu}
               aria-label="create new content"
+              size="large"
+              sx={{ 
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                  transform: 'scale(1.05)'
+                },
+                transition: 'transform 0.2s'
+              }}
             >
               <Add />
             </IconButton>
@@ -190,12 +222,12 @@ const Blogs = () => {
       {!loading && !error && (
         <>
           {(blogs ?? []).length === 0 ? (
-            <Alert severity="info">No blogs found.</Alert>
+            <Alert severity="info" sx={{ textAlign: 'center' }}>No blogs found.</Alert>
           ) : (
             <Box
               sx={{
                 display: "grid",
-                gap: 2,
+                gap: 3,
                 gridTemplateColumns: {
                   xs: "1fr",
                   sm: "repeat(2, 1fr)",
@@ -217,15 +249,38 @@ const Blogs = () => {
                       height: "100%",
                       display: "flex",
                       flexDirection: "column",
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: 4
+                      }
                     }}
                   >
                     <CardHeader
-                      avatar={<Avatar>{avatarLabel}</Avatar>}
+                      avatar={
+                        <Avatar 
+                          sx={{ 
+                            bgcolor: 'primary.main',
+                            fontSize: '1.2rem',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {avatarLabel}
+                        </Avatar>
+                      }
                       title={
                         <Typography
                           component={Link}
                           to={`/blog/${b._id}`}
-                          sx={{ textDecoration: "none", color: "inherit" }}
+                          sx={{ 
+                            textDecoration: "none", 
+                            color: "inherit",
+                            fontWeight: 600,
+                            fontSize: '1.1rem',
+                            '&:hover': {
+                              color: 'primary.main'
+                            }
+                          }}
                           variant="h6"
                         >
                           {b.name}
@@ -241,14 +296,15 @@ const Blogs = () => {
                     <CardActions
                       sx={{ justifyContent: "space-between", px: 2, pb: 2 }}
                     >
-                      <Stack direction="row" spacing={1}>
+                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
                         <Button
                           size="small"
                           component={Link}
                           to={`/blog/${b._id}`}
                           variant="outlined"
+                          color="primary"
                         >
-                          View posts
+                          Explore
                         </Button>
 
                         {/* show subscribe button only when user is authenticated and blog is not subscribed */}
@@ -262,6 +318,9 @@ const Blogs = () => {
                                 startIcon={<NotificationsNone />}
                                 onClick={() => handleSubscribe(b._id)}
                                 disabled={!!processingIds[b._id]}
+                                sx={{ 
+                                  whiteSpace: 'nowrap'
+                                }}
                               >
                                 Subscribe
                               </Button>
@@ -280,6 +339,9 @@ const Blogs = () => {
                                 color="primary"
                                 onClick={() => handleUnsubscribe(b._id)}
                                 disabled={!!processingIds[b._id]}
+                                sx={{ 
+                                  whiteSpace: 'nowrap'
+                                }}
                               >
                                 Unsubscribe
                               </Button>
@@ -302,7 +364,7 @@ const Blogs = () => {
         message={snack.message}
         autoHideDuration={3000}
       />
-    </Box>
+    </Container>
   );
 };
 

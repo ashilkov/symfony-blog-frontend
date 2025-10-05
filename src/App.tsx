@@ -10,11 +10,9 @@ import Posts from "./pages/Posts";
 import CreatePost from "./pages/CreatePost";
 import Post from "./pages/Post";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import { MantineProvider } from "@mantine/core";
 import EditPost from "./pages/EditPost";
-
-// removed placeholder Posts component in favor of page
-const Contact = () => <div>Contact</div>;
 
 function App() {
   return (
